@@ -12,6 +12,7 @@
 	import { sessionCreate, sessionList, sessionListFolders, sessionCreateFolder, type SessionConfig, type AuthMethod, type JumpHostConfig, type Folder } from '$lib/ipc/sessions';
 	import { addToast } from '$lib/state/toasts.svelte';
 	import { t } from '$lib/state/i18n.svelte';
+	import { folderPath } from '$lib/sessions/folder-tree';
 
 	interface Props {
 		open: boolean;
@@ -233,7 +234,7 @@
 					<span>{t('session.import_into')}</span>
 					<select class="tool-input" bind:value={folderChoice} disabled={importing}>
 						<option value="">{t('session.import_no_folder')}</option>
-						{#each folders as f (f.id)}<option value={f.id}>{f.name}</option>{/each}
+						{#each folders as f (f.id)}<option value={f.id}>{folderPath(f.id, folders)}</option>{/each}
 						<option value={NEW}>{t('session.new_folder')}</option>
 					</select>
 				</label>

@@ -419,6 +419,7 @@ pub fn run() {
             session_move_to_folder,
             session_list_folders,
             session_create_folder,
+            session_update_folder_parent,
             session_delete_folder,
             session_share,
             // Tunnel commands
@@ -807,6 +808,7 @@ pub fn run() {
             session_move_to_folder,
             session_list_folders,
             session_create_folder,
+            session_update_folder_parent,
             session_delete_folder,
             session_share,
             // Tunnel commands
