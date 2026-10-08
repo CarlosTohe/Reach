@@ -28,6 +28,8 @@
 	let lines = $state<string[]>([]);
 	let partial = '';
 	let follow = $state(true);
+	/** Paused: the view holds still, as it was, while lines keep arriving. */
+	let frozen = $state<string[] | null>(null);
 	let wrap = $state(true);
 	let query = $state('');
 	let onlyMatches = $state(false);
@@ -54,6 +56,7 @@
 		partial = '';
 		error = '';
 		follow = true;
+		frozen = null;
 		let cancelled = false;
 		begin(push)
 			.then((s) => {
@@ -72,25 +75,41 @@
 
 	let needle = $derived(query.trim().toLowerCase());
 	let shown = $derived.by(() => {
-		const all = needle && onlyMatches ? lines.filter((l) => l.toLowerCase().includes(needle)) : lines;
+		const source = frozen ?? lines;
+		const all = needle && onlyMatches ? source.filter((l) => l.toLowerCase().includes(needle)) : source;
 		return all.length > SHOW ? all.slice(all.length - SHOW) : all;
 	});
-	let hiddenCount = $derived((needle && onlyMatches ? lines.filter((l) => l.toLowerCase().includes(needle)).length : lines.length) - shown.length);
+	let hiddenCount = $derived.by(() => {
+		const source = frozen ?? lines;
+		return (needle && onlyMatches ? source.filter((l) => l.toLowerCase().includes(needle)).length : source.length) - shown.length;
+	});
+	/** Lines that arrived while paused, shown on resume. */
+	let arrived = $derived(frozen ? Math.max(0, lines.length - frozen.length) : 0);
 	let matchCount = $derived(needle ? lines.reduce((n, l) => n + (l.toLowerCase().includes(needle) ? 1 : 0), 0) : 0);
 
 	// Keep to the end while following.
 	$effect(() => {
 		void shown.length;
-		if (follow && box) queueMicrotask(() => box && (box.scrollTop = box.scrollHeight));
+		if (follow && !frozen && box) queueMicrotask(() => box && (box.scrollTop = box.scrollHeight));
 	});
 
 	function onScroll(): void {
-		if (!box) return;
+		if (!box || frozen) return;
 		const atEnd = box.scrollHeight - box.scrollTop - box.clientHeight < 24;
 		if (follow !== atEnd) follow = atEnd;
 	}
 
+	function togglePause(): void {
+		if (frozen) {
+			jumpToLive();
+		} else {
+			frozen = lines.slice();
+			follow = false;
+		}
+	}
+
 	function jumpToLive(): void {
+		frozen = null;
 		follow = true;
 		if (box) box.scrollTop = box.scrollHeight;
 	}
@@ -132,6 +151,7 @@
 		{/if}
 		<span class="spacer"></span>
 		<label class="check"><input type="checkbox" bind:checked={wrap} />{t('logs.wrap')}</label>
+		<button type="button" class="tool" aria-pressed={!!frozen} onclick={togglePause}>{frozen ? t('logs.resume') : t('logs.pause')}</button>
 		<button type="button" class="tool" onclick={() => (lines = [])}>{t('logs.clear')}</button>
 		<button type="button" class="tool" onclick={download}>{t('logs.download')}</button>
 	</div>
@@ -150,7 +170,9 @@
 		{/each}
 	</div>
 
-	{#if !follow}
+	{#if frozen}
+		<button type="button" class="live" onclick={jumpToLive}>{t('logs.paused_new', { count: arrived })} ↓</button>
+	{:else if !follow}
 		<button type="button" class="live" onclick={jumpToLive}>{t('logs.jump_to_live')} ↓</button>
 	{/if}
 </div>
