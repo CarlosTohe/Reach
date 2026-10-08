@@ -267,7 +267,14 @@ impl Sequence for ConnectionFinalizationSequence {
 
                         ConnectionFinalizationState::Finished
                     }
-                    _ => return Err(general_err!("unexpected server message")),
+                    // Reach: a server may send other share data (xrdp does,
+                    // during the deactivation-reactivation a resize starts)
+                    // before the Font Map. Windows' client and FreeRDP go on
+                    // waiting; failing here dropped the session (Reach #49).
+                    other => {
+                        warn!(pdu = other.as_short_name(), "Ignoring server message received before the Font Map");
+                        ConnectionFinalizationState::WaitForResponse
+                    }
                 };
 
                 (Written::Nothing, next_state)
