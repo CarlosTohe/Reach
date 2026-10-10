@@ -279,7 +279,11 @@ windows-core = "0.62"
 webview2-com = "0.39"
 
 [target.'cfg(target_os = "linux")'.dependencies]
+# The kernel keyring is emptied by every reboot (issue #87): the vault key goes
+# to the desktop's keychain (GNOME Keyring, KWallet) through the Secret
+# Service, with the kernel keyring as the fallback where there is none.
 linux-keyutils-keyring-store = "1"
+zbus-secret-service-keyring-store = { version = "1", features = ["rt-tokio-crypto-rust"] }
 # Following the screen lock and sleep over D-Bus (src/system_lock.rs); the
 # version already in the tree.
 zbus = { version = "5", features = ["blocking-api"] }

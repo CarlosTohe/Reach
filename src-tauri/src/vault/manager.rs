@@ -3530,10 +3530,7 @@ pub(crate) fn keychain_entry_in(service: &str, user: &str) -> Result<keyring_cor
             #[cfg(all(not(test), target_os = "macos"))]
             let store = apple_native_keyring_store::keychain::Store::new();
             #[cfg(all(not(test), target_os = "linux"))]
-            let store = linux_keyutils_keyring_store::Store::new_with_configuration(&HashMap::from([(
-                "prefix",
-                "keyring-rs:",
-            )]));
+            let store = super::linux_keychain::Store::new();
             #[cfg(all(not(test), not(any(target_os = "windows", target_os = "macos", target_os = "linux"))))]
             let store = keyring_core::mock::Store::new();
             store.map(|s| keyring_core::set_default_store(s)).map_err(|e| e.to_string())

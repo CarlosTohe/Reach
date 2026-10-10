@@ -7,6 +7,8 @@ pub mod error;
 pub mod export;
 pub mod fido2;
 pub mod kdf;
+#[cfg(target_os = "linux")]
+pub mod linux_keychain;
 pub mod manager;
 pub mod schema;
 pub mod shield;
