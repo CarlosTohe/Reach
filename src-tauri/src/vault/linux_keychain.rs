@@ -102,16 +102,24 @@ impl CredentialApi for Cred {
         let ku = self.ku.set_secret(secret);
         match ss {
             // The keychain that lasts holds it: a kernel keyring failure
-            // only costs the fallback copy.
+            // only costs the fallback copy. An older key left there would be
+            // read if the Secret Service is ever unreachable, so it goes.
             Some(Ok(())) => {
                 if let Err(e) = ku {
                     tracing::debug!("kernel keyring copy not stored: {e}");
+                    let _ = self.ku.delete_credential();
                 }
                 Ok(())
             }
+            // An older key left in the Secret Service would be read first, so
+            // it goes; if it cannot be removed, the store failed.
             Some(Err(e)) => {
                 tracing::warn!("Secret Service did not store the key ({e}); kept in the kernel keyring, which a reboot empties");
-                ku
+                ku?;
+                match self.ss.clone().map(|s| off_runtime(move || s.delete_credential()).and_then(|r| r)) {
+                    Some(Ok(())) | Some(Err(Error::NoEntry)) | None => Ok(()),
+                    Some(Err(_)) => Err(e),
+                }
             }
             None => ku,
         }
