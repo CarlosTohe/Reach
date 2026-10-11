@@ -2,6 +2,12 @@
 
 All notable changes to Reach are documented here.
 
+## v0.7.7
+- **Folders inside folders** — Session folders can now hold folders, as deep as you like. Drag a folder onto another, or use Move to in its menu (long-press on a phone); a folder cannot be moved into itself or one of its own subfolders, nor into a folder of another vault. Deleting a folder moves what it held up one level, nothing is deleted with it. Thanks to @erxson (#88).
+- **Container logs hold still** — A container's live log no longer started over every time the container list refreshed, which jumped the view back to the end while you read. The stream now restarts only when you pick another container, and Pause log freezes the view while new lines keep arriving, with a count of how many came in; Resume shows them (#94).
+- **Fixed: remote desktop on xrdp dropped on full screen** — Going full screen resizes the desktop, which xrdp does by reconnecting, and the reconnect stopped on xrdp's login screen or ended with an error. Reach now logs in with the password the session gives (autologon), so a connect or a reconnect lands in your session, and a message xrdp sends earlier than the protocol expects no longer ends the connection (#49).
+- **Linux: the vault key in your desktop's keychain** — On Linux the vault's key now goes to the Secret Service (GNOME Keyring, KWallet), which keeps it on disk encrypted with your login password, as your browser's saved passwords are. 0.7.6 got the vault open again after a reboot; with this the key survives the reboot too. A key 0.7.6 or earlier kept in the kernel keyring is copied over the first time it is read. Without a Secret Service (a server, a bare window manager) the kernel keyring stays the fallback (#87).
+
 ## v0.7.6
 - **Fixed: on Linux, saved sessions seemed gone after a restart** — Reach kept the vault's key only in the kernel keyring, which every reboot empties and which expires after a few days, so the vault could no longer be opened and looked empty. Nothing was deleted. Reach now opens it with the key kept in the identity file (for a vault set up without a password) and puts the key back; a vault with a master password asks for it, as before (#87).
 - **Fixed: the update dialog could not be dismissed** — It now always offers Later. A .deb or a build from source cannot update itself in place, and was stuck in front of it.
