@@ -125,6 +125,10 @@ fn num_level(n: u64) -> LevelFilter {
 }
 
 fn refresh_max() {
+    // One at a time: a connection closing while another opens could otherwise
+    // store its older count last and leave MAX at 0, dropping every line.
+    static REFRESH: Mutex<()> = Mutex::new(());
+    let _one = REFRESH.lock().unwrap_or_else(|e| e.into_inner());
     let want = logs().lock().unwrap().values().map(|l| if l.verbose.is_empty() { level_num(l.level.filter()) } else { 5 }).max().unwrap_or(0);
     if MAX.swap(want, Ordering::Relaxed) != want {
         // russh logs through the log crate; let its records through too.
@@ -369,6 +373,13 @@ where
 mod tests {
     use super::*;
 
+    /// The tests that open connection logs share MAX and tracing's global
+    /// level, so they take turns.
+    fn serial() -> std::sync::MutexGuard<'static, ()> {
+        static TURN: Mutex<()> = Mutex::new(());
+        TURN.lock().unwrap_or_else(|e| e.into_inner())
+    }
+
     #[test]
     fn control_characters_are_shown_not_obeyed() {
         assert_eq!(vis("Welcome\x1b]0;owned\x07 to h\u{e9}llo\tok"), "Welcome\\033]0;owned\\007 to h\u{e9}llo\tok");
@@ -377,6 +388,7 @@ mod tests {
 
     #[test]
     fn levels() {
+        let _turn = serial();
         assert_eq!(LogLevel::parse("debug"), Some(LogLevel::Debug1));
         assert_eq!(LogLevel::parse("Verbose"), Some(LogLevel::Verbose));
         assert_eq!(LogLevel::parse("loud"), None);
@@ -393,6 +405,7 @@ mod tests {
 
     #[test]
     fn collects_inside_the_connection_only() {
+        let _turn = serial();
         use tracing_subscriber::layer::SubscriberExt;
         let sub = tracing_subscriber::registry().with(ConnLogLayer.with_filter(ConnLogFilter));
         let log = ConnLog::new(Some("DEBUG1"), &["*:*connlog*:*".into()]);
@@ -421,7 +434,30 @@ mod tests {
     }
 
     #[test]
+    fn connections_opening_and_closing_at_once_keep_the_level() {
+        let _turn = serial();
+        // A connection opening while others close: whichever count is stored
+        // last must still include it.
+        for _ in 0..200 {
+            let churn: Vec<_> = (0..4)
+                .map(|_| {
+                    std::thread::spawn(|| {
+                        for _ in 0..20 {
+                            close(&ConnLog::new(Some("ERROR"), &[]));
+                        }
+                    })
+                })
+                .collect();
+            let kept = ConnLog::new(Some("DEBUG3"), &[]);
+            churn.into_iter().for_each(|t| t.join().unwrap());
+            assert!(MAX.load(Ordering::Relaxed) >= level_num(kept.level.filter()));
+            close(&kept);
+        }
+    }
+
+    #[test]
     fn russh_packet_debug_stops_once_the_session_is_up() {
+        let _turn = serial();
         use tracing_subscriber::layer::SubscriberExt;
         let sub = tracing_subscriber::registry().with(ConnLogLayer.with_filter(ConnLogFilter));
         let log = ConnLog::new(Some("DEBUG1"), &[]);
