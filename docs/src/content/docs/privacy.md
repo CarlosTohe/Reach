@@ -26,7 +26,13 @@ Sessions, passwords, SSH keys, database connections and settings are stored on y
 
 ## This website
 
-reachssh.com is a static site hosted on GitHub Pages. It uses no analytics, no cookies and no tracking scripts. GitHub, as the host, receives the usual request information such as IP addresses; see [GitHub's privacy statement](https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement).
+reachssh.com is a static site hosted on GitHub Pages. GitHub, as the host, receives the usual request information such as IP addresses; see [GitHub's privacy statement](https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement).
+
+The site asks once whether it may use Google Ads cookies, to measure which ads bring visitors here. Until you accept, Google's script is not loaded at all: nothing is sent to Google and no cookie is set. If you accept, Google receives your visit (the page, your IP address and the cookie it sets) under [Google's privacy policy](https://policies.google.com/privacy); this is used to count ad conversions, not to build a profile on this site. There is no other analytics. Your choice is kept in your browser only.
+
+<button id="ads-consent-change" type="button">Change my cookie choice</button>
+
+None of this concerns the Reach app, which makes no such connections.
 
 ## Questions
 

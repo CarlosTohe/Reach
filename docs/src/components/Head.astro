@@ -14,6 +14,7 @@
  */
 import Default from '@astrojs/starlight/components/Head.astro';
 import { KEYWORDS, ORG, PRODUCT } from '../site';
+import AdsConsent from './AdsConsent.astro';
 
 const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : Astro.url.href;
 const origin = Astro.site?.href.replace(/\/$/, '') ?? '';
@@ -107,6 +108,8 @@ const softwareGraph = {
 ---
 
 <Default {...Astro.props}><slot /></Default>
+
+<AdsConsent />
 
 <link rel="canonical" href={canonical} />
 
