@@ -10,12 +10,17 @@
  *
  * The choice is kept in this browser's localStorage and nowhere else. The
  * privacy page has a button (id="ads-consent-change") that asks again.
+ *
+ * A click on a link to a release file (.../releases/download/...) counts as
+ * the "Download" conversion, only once the tag is loaded, which is only after
+ * Accept. It is sent as a beacon, so it survives the page leaving for GitHub.
  */
 const TAG = 'AW-18507456816';
+const DOWNLOAD = 'AW-18507456816/3bbVCI3Bw5kdELDChflE';
 const PRIVACY = `${import.meta.env.BASE_URL.replace(/\/?$/, '/')}privacy/`;
 ---
 
-<script is:inline define:vars={{ TAG, PRIVACY }}>
+<script is:inline define:vars={{ TAG, PRIVACY, DOWNLOAD }}>
 	(() => {
 		const KEY = 'reach-ads-consent';
 		window.dataLayer = window.dataLayer || [];
@@ -85,6 +90,16 @@ const PRIVACY = `${import.meta.env.BASE_URL.replace(/\/?$/, '/')}privacy/`;
 			});
 			document.body.appendChild(box);
 		};
+
+		document.addEventListener(
+			'click',
+			(e) => {
+				const a = e.target.closest?.('a[href]');
+				if (!loaded || !a || !/\/releases\/(latest\/)?download\//.test(a.href)) return;
+				gtag('event', 'conversion', { send_to: DOWNLOAD, transport_type: 'beacon' });
+			},
+			true,
+		);
 
 		const choice = read();
 		if (choice === 'granted') load();
