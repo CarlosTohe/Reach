@@ -1,8 +1,14 @@
-A fix for Linux: saved sessions are back after a restart.
+Folders inside folders, container logs that hold still, and steadier remote desktops on xrdp.
 
-- Fixed: on Linux the vault could no longer be opened after a reboot, so
-  saved sessions seemed gone. They were never deleted; Reach opens the vault
-  again and keeps its key. If you set a master password, Reach asks for it.
-- Fixed: the update dialog can always be closed with Later.
+- New: session folders can hold folders. Move one into another from its
+  menu; deleting a folder moves what it held up a level. Thanks @erxson.
+- Container logs no longer jump back while you read, and Pause log
+  freezes the view while new lines keep arriving.
+- Fixed: going full screen on an xrdp desktop dropped the connection or
+  stopped at xrdp's login screen.
+- Linux: the vault key is kept in your desktop's keychain (GNOME Keyring,
+  KWallet), so it survives a reboot.
+- Security: an update is installed only if its signature names its
+  version, and Tauri and the other dependencies are up to date.
 
 Full details: https://github.com/alexandrosnt/Reach/blob/main/CHANGELOG.md
