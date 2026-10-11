@@ -434,22 +434,21 @@ mod tests {
     }
 
     #[test]
-    fn connections_opening_and_closing_at_once_keep_the_level() {
+    fn a_connection_opening_as_another_closes_keeps_its_level() {
         let _turn = serial();
-        // A connection opening while others close: whichever count is stored
-        // last must still include it.
-        for _ in 0..200 {
-            let churn: Vec<_> = (0..4)
-                .map(|_| {
-                    std::thread::spawn(|| {
-                        for _ in 0..20 {
-                            close(&ConnLog::new(Some("ERROR"), &[]));
-                        }
-                    })
-                })
-                .collect();
+        // One closes while the other opens, and nothing refreshes after: the
+        // count stored last must include the one still open.
+        for _ in 0..300 {
+            let closing = ConnLog::new(Some("ERROR"), &[]);
+            let start = Arc::new(std::sync::Barrier::new(2));
+            let go = start.clone();
+            let t = std::thread::spawn(move || {
+                go.wait();
+                close(&closing);
+            });
+            start.wait();
             let kept = ConnLog::new(Some("DEBUG3"), &[]);
-            churn.into_iter().for_each(|t| t.join().unwrap());
+            t.join().unwrap();
             assert!(MAX.load(Ordering::Relaxed) >= level_num(kept.level.filter()));
             close(&kept);
         }
