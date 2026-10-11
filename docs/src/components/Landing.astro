@@ -468,7 +468,10 @@ const CHIPS = [
 
 	.glow {
 		position: absolute;
-		inset: -8rem -20% auto -20%;
+		/* 20% past the content on each side, but never past the window: a
+		   phone sizes the page to everything in it, and a wider page opened
+		   zoomed out. calc(50% - 50vw) is the distance to the window's edge. */
+		inset: -8rem max(-20%, calc(50% - 50vw)) auto max(-20%, calc(50% - 50vw));
 		height: 46rem;
 		pointer-events: none;
 		z-index: -1;
