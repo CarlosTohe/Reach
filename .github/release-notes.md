@@ -8,5 +8,7 @@ Folders inside folders, container logs that hold still, and steadier remote desk
   stopped at xrdp's login screen.
 - Linux: the vault key is kept in your desktop's keychain (GNOME Keyring,
   KWallet), so it survives a reboot.
+- Security: an update is installed only if its signature names its
+  version, and Tauri and the other dependencies are up to date.
 
 Full details: https://github.com/alexandrosnt/Reach/blob/main/CHANGELOG.md
