@@ -32,7 +32,8 @@
       "endpoints": [
         "https://github.com/alexandrosnt/Reach/releases/latest/download/latest.json"
       ],
-      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDFCRkZFNDFCOTkzQTMxN0YKUldSL01UcVpHK1QvR3phYzY3VVVVWUlZYjIxdUh0bmprWDdCNUFRMG9kS052UlBwMm5kVXFwb1cK"
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDFCRkZFNDFCOTkzQTMxN0YKUldSL01UcVpHK1QvR3phYzY3VVVVWUlZYjIxdUh0bmprWDdCNUFRMG9kS052UlBwMm5kVXFwb1cK",
+      "requireSignedVersion": true
     }
   },
   "bundle": {
