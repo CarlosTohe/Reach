@@ -582,6 +582,14 @@ fn build_config(p: &RdpConnectParams, app: AppHandle) -> Result<ironrdp_client::
         builder = builder.with_domain(&p.domain);
     }
 
+    // Log in with the password given, as mstsc does with saved credentials.
+    // A server that authenticates over CredSSP (Windows) does not need it;
+    // one that takes the login over TLS (xrdp) otherwise shows its own login
+    // screen, on every connect and on every reconnect, a resize's included.
+    if !p.password.is_empty() {
+        builder = builder.with_autologon(true);
+    }
+
     // Remote audio, played through the default output device. IronRDP owns
     // the playback backend; only the desktops build it (see Cargo.toml).
     #[cfg(not(target_os = "android"))]

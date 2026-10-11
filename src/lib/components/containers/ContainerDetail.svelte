@@ -30,10 +30,14 @@
 	let running = $derived(container.state === 'running' || container.state === 'restarting');
 	let paused = $derived(container.state === 'paused');
 
-	// A new stream for each container; the viewer stops the old one.
+	// A new stream for each container; the viewer stops the old one. Keyed
+	// on the id alone: the list refreshes every few seconds with new but
+	// equal rows, and following those restarted the log and threw the reader
+	// back to the end (#94).
+	let containerId = $derived(container.id);
 	let start = $derived.by(() => {
 		const key = hostKey;
-		const id = container.id;
+		const id = containerId;
 		return (onData: (c: string) => void) => ctrLogs(key, id, 500, onData);
 	});
 
